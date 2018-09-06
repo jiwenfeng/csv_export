@@ -5,6 +5,8 @@ local TypeList = {
     ["Json::Value"] = "String2Json"
 }
 
+local CSV_PATH = ""
+
 function Split(str, sep)
     local strList = {}
     string.gsub(str, '[^' .. sep .. ']+', function(w)
@@ -95,7 +97,7 @@ function AnalysisCsvFile(path)
 
     for i = 1, #varTypeList do
         local attr = {}
-        -- attr.varType = string.match(varTypeList[i], "//(.+)")
+        attr.varType = varTypeList[i]
         attr.varType = string.gsub(attr.varType, "string", "std::string")
         attr.varType = string.gsub(attr.varType, "map", "std::map")
         attr.varType = string.gsub(attr.varType, "array", "std::vector")
@@ -153,7 +155,7 @@ function ExportClassSourceFile(data)
     handler:write("#include \"" .. data.clsName .. ".h\"\n")
     handler:write("#include \"csv_tool.h\"\n\n")
     handler:write("namespace CsvConfig\n{\n")
-    handler:write("\tstd::string " .. data.clsName .. "::m_fileName = \"../" .. data.path .. "\";\n")
+    handler:write("\tstd::string " .. data.clsName .. "::m_fileName = \"" .. CSV_PATH .. data.path .. "\";\n")
     handler:write("\t" .. data.clsName .. "::" .. data.clsName .. "()\n\t{\n\t}\n\n")
     handler:write("\t" .. data.clsName .. "::~" .. data.clsName .. "()\n\t{\n\t}\n\n")
 
@@ -198,7 +200,6 @@ function ExportMgrHeaderFile(result)
     handler:write("#define __CONFIG_MGR_H__\n")
 
     handler:write("#include <map>\n")
-    --handler:write("#include \"base/lock.h\"\n")
 
     for _, data in ipairs(result) do
         handler:write("#include \"" .. data.clsName .. ".h\"\n")
@@ -229,7 +230,7 @@ function ExportMgrHeaderFile(result)
 
     handler:write("public:\n")
     for _, data in ipairs(result) do
-        handler:write("\tbool find" .. data.clsName .. "ByKey(" .. data.cols[1].varType .. " " .. data.cols[1].varName .. ", CsvConfig::" .. data.clsName .. " &out);\n\n")
+        handler:write("\tCsvConfig::" .. data.clsName .. "* find" .. data.clsName .. "ByKey(" .. data.cols[1].varType .. " " .. data.cols[1].varName .. ");\n\n")
         handler:write("\tconst std::map<" .. data.cols[1].varType..", CsvConfig::" .. data.clsName .. "> get" .. data.clsName .. "Map();\n\n")
     end
 
@@ -237,7 +238,6 @@ function ExportMgrHeaderFile(result)
     for _, data in ipairs(result) do
         handler:write("\tstd::map<"..data.cols[1].varType..", CsvConfig::" .. data.clsName .. "> m_map" .. data.clsName .. ";\n")
     end
---    handler:write("\tbase::Lock m_lock;\n")
 
     handler:write("};\n")
     handler:write("#endif\n")
@@ -256,16 +256,13 @@ function ExportMgrSourceFile(result)
 
     handler:write("CsvConfigMgr::CsvConfigMgr()\n")
     handler:write("{\n")
-    handler:write("\tload();\n")
     handler:write("}\n\n")
 
     handler:write("void CsvConfigMgr::reload()\n")
     handler:write("{\n")
-   -- handler:write("\tbase::Guard g(m_lock);\n")
     for _, data in ipairs(result) do
         handler:write("\tm_map"..data.clsName..".clear();\n")
     end
-    handler:write("\tload();\n")
     handler:write("}\n\n")
 
     handler:write("void CsvConfigMgr::load()\n")
@@ -276,9 +273,8 @@ function ExportMgrSourceFile(result)
     handler:write("}\n\n")
 
     for _, data in ipairs(result) do
-        handler:write("bool CsvConfigMgr::find" .. data.clsName .. "ByKey(" .. data.cols[1].varType .. " " .. data.cols[1].varName .. ", CsvConfig::" .. data.clsName .. " &out)\n")
+        handler:write("CsvConfig::" .. data.clsName .."* " .. "CsvConfigMgr::find" .. data.clsName .. "ByKey(" .. data.cols[1].varType .. " " .. data.cols[1].varName .. ")\n")
         handler:write("{\n")
-     --   handler:write("\tbase::Guard g(m_lock);\n")
         handler:write("\tif(m_map" .. data.clsName .. ".empty())\n")
         handler:write("\t{\n")
         handler:write("\t\tload"..data.clsName.."FromCsv();\n")
@@ -286,15 +282,13 @@ function ExportMgrSourceFile(result)
         handler:write("\tstd::map<"..data.cols[1].varType..", CsvConfig::" .. data.clsName .. ">::iterator i = m_map"..data.clsName..".find(" .. data.cols[1].varName .. ");\n")
         handler:write("\tif(i == m_map"..data.clsName..".end())\n")
         handler:write("\t{\n")
-        handler:write("\t\treturn false;\n")
+        handler:write("\t\treturn NULL;\n")
         handler:write("\t}\n")
-        handler:write("\tout = i->second;\n")
-        handler:write("\treturn true;\n")
+        handler:write("\treturn &i->second;\n")
         handler:write("}\n\n")
 
         handler:write("const std::map<"..data.cols[1].varType .. ", CsvConfig::"..data.clsName .."> CsvConfigMgr::get" .. data.clsName .. "Map()\n")
         handler:write("{\n")
-       -- handler:write("\tbase::Guard g(m_lock);\n")
         handler:write("\tif(m_map"..data.clsName..".empty())\n")
         handler:write("\t{\n")
         handler:write("\t\tload" .. data.clsName .. "FromCsv();\n")
@@ -338,7 +332,8 @@ end
 
 function main(files)
     local result = {}
-    for i = 1, #files do
+	CSV_PATH = files[1]
+    for i = 2, #files do
         local ret, data = ExportClassFile(files[i])
         if not ret then
             print(string.format("Export `%s` Fail", files[i]))
