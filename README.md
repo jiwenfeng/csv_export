@@ -3,9 +3,9 @@
 第9行为该列的数据类型 支持string,map,array,int,json</br>
 第11行为注释行</br>
 第12行为该列的字段名,不能有空格</br>
-数据内容从第13行开始</br>
-第一列为索引,只能为int或stirng类型
 ## 以上行不能为空
+**数据内容从第13行开始</br>
+**第一列为索引,只能为int或stirng类型
 
 ### 类型定义</br>
 map的定义要符合c++ std::map的定义格式 key和value类型只能是string,int</br>
