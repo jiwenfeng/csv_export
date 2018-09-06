@@ -101,9 +101,7 @@ function AnalysisCsvFile(path)
         attr.varType = string.gsub(attr.varType, "string", "std::string")
         attr.varType = string.gsub(attr.varType, "map", "std::map")
         attr.varType = string.gsub(attr.varType, "array", "std::vector")
-        if attr.varType == "json" then
-            attr.varType = "Json::Value"
-        end
+        attr.varType = string.gsub(attr.varType, "json", "Json::Value")
         attr.varName = varNameList[i]
         attr.comment = commentList[i]
         table.insert(result.cols, attr)
@@ -183,7 +181,7 @@ end
 function ExportClassFile(path)
     local result = AnalysisCsvFile(path)
     if not result then
-        print("Analysis " .. path .. "fail")
+        print("Analysis " .. path .. " fail")
         return false
     end
     if ExportClassHeaderFile(result) and ExportClassSourceFile(result) then

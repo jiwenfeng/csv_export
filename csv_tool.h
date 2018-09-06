@@ -6,12 +6,13 @@
 #include <vector>
 #include <string>
 #include <json/json.h>
+#include <iostream>
 
 void String2Json(const std::string &data, Json::Value &out);
 
 void String2Int(const std::string &data, int &out);
 
-std::vector<std::string> SplitString(const std::string &data, const std::string &sep);
+std::vector<std::string> SplitString(const std::string &data, const char sep);
 
 template<typename T1, typename T2>
 T2 Convert(const T1 &data)
@@ -27,7 +28,7 @@ T2 Convert(const T1 &data)
 template<class T>
 void String2Vector(const std::string &data, T &out)
 {
-    std::vector<std::string> v = SplitString(data, ",");
+    std::vector<std::string> v = SplitString(data, ',');
     for(std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
     {
         typename T::value_type val = Convert<std::string, typename T::value_type>(*i);
@@ -39,10 +40,10 @@ void String2Vector(const std::string &data, T &out)
 template<typename T>
 void String2Map(const std::string &data, T &out)
 {
-    std::vector<std::string> v = SplitString(data, ",");
+    std::vector<std::string> v = SplitString(data, ',');
     for(std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
     {
-        std::vector<std::string> pair = SplitString(*i, ":");
+        std::vector<std::string> pair = SplitString(*i, ':');
         if(pair.size() != 2)
         {
             continue;
