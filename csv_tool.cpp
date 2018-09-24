@@ -85,8 +85,6 @@ void CsvTable2Vector(const std::string &file, std::string &key, std::vector<Fiel
 	}
 }
 
-
-
 std::vector<std::string> ParseCsvRecord(const std::string &data)
 {
     std::vector<std::string> v;

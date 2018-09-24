@@ -12,7 +12,7 @@ map的定义要符合c++ std::map的定义格式 key和value类型只能是strin
 array需要符合c++ std::vector的格式定义 类型只能是int,string</br>
 #数据格式定义</br>
 array 数据格式为 1,2,3,4 </br>
-map 数据格式为 1:1,2:2 </br>
+map 数据格式为 1|1,2|2 </br>
 json 数据为通用json格式</br>
 
 ### 生成</br>

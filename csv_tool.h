@@ -36,14 +36,14 @@ void String2Vector(const std::string &data, T &out)
     }
 }
 
-//1:1,2:2
+//1|1,2|2
 template<typename T>
 void String2Map(const std::string &data, T &out)
 {
     std::vector<std::string> v = SplitString(data, ',');
     for(std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
     {
-        std::vector<std::string> pair = SplitString(*i, ':');
+        std::vector<std::string> pair = SplitString(*i, '|');
         if(pair.size() != 2)
         {
             continue;
