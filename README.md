@@ -22,8 +22,3 @@ lua gen.lua [csv_path] [file1.csv] [file2.csv] ... </br>
 程序会生成一个CsvConfigMgr类,每一个csv文件都会在该类里面生成一个findxxByKey()方法和一个getxxMap()方法.find方法使用
 csv的索引列作为key来查找,get方法返回对应csv的全部记录.</br>
 CsvConfigMgr使用单例模式访问,只需要包含config_mgr.h头文件即可.
-
-
-# 注意</br>
-需要将csv_tool.h和csv_tool.cpp和最终生成的文件放在同一目录下</br>
-
